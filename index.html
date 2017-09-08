@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>On The Fly Weather</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="./css/main.css">
+  <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+  <div class="loader"></div>
+  <div class="global_wrap">
+    <div class="sun_container">
+      <div class="sun"></div>
+    </div>
+    <div class="main">
+      <header>
+        <div class="title">
+          <h1>On The Fly Weather</h1>
+          <!--<img src="imgs/airplane.png" class="airplane">-->
+        </div>
+
+      </header>
+
+      <div class="location_holder">
+        <h2><span id="city"></span>, <span id="state"></span></h2>
+      </div>
+      <div class="zip_container">
+        <p>Not your location? Enter your Zip Code&nbsphere:</p>
+        <input placeholder="76148" type="text" maxlength="5" id="zip_input">
+        <div class="my_button" id="zip_button">
+          Find
+        </div>
+      </div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-4 time_box">
+            <div class="zone_title bottom_bar">
+              <h4 class="date_string"> <span id="today_month"></span> <span id="today_date"></span> 2017</h4>
+            </div>
+            <div class="inner_time">
+              <p class="hours" id="hours"></p>
+              <p>:</p>
+              <p class="minutes" id="minutes"></p>
+              <p>:</p>
+              <div class="seconds_holder">
+                <p class="ampm" id="ampm"></p>
+                <p class="seconds" id="seconds"></p>
+              </div>
+            </div>
+
+            <div class="current_conditions">
+              <div class="weather_icon" id="current_weather_icon"></div>
+              <p id="current_weather"></p>
+            </div>
+
+            <div class="temperature_text">
+              <p> <span id="current_temperature"></span> °F</p>
+            </div>
+          </div>
+          <div class="col-sm-8 pad_override">
+
+            <div class="hourly_forecast_container">
+              <div class="zone_title bottom_bar">
+            <h4>Hourly Forecast</h4>
+              </div>
+            <div class="hourly_forecast">
+              <div class="hour_img_holder">
+                <div class="weather_icon_small" id="hourly_icon_0"></div>
+                <div class="weather_icon_small" id="hourly_icon_1"></div>
+                <div class="weather_icon_small" id="hourly_icon_2"></div>
+                <div class="weather_icon_small" id="hourly_icon_3"></div>
+                <div class="weather_icon_small" id="hourly_icon_4"></div>
+                <div class="weather_icon_small" id="hourly_icon_5"></div>
+                <div class="weather_icon_small" id="hourly_icon_6"></div>
+                <div class="weather_icon_small" id="hourly_icon_7"></div>
+                <div class="weather_icon_small" id="hourly_icon_8"></div>
+              </div>
+              <div class="hourly_temp_wrap">
+                <span class="hourly_temp_holder" id="hourly_temp_0">77</span>
+                <span class="hourly_temp_holder" id="hourly_temp_1">56</span>
+                <span class="hourly_temp_holder" id="hourly_temp_2">45</span>
+                <span class="hourly_temp_holder" id="hourly_temp_3">65</span>
+                <span class="hourly_temp_holder" id="hourly_temp_4">76</span>
+                <span class="hourly_temp_holder" id="hourly_temp_5">45</span>
+                <span class="hourly_temp_holder" id="hourly_temp_6">65</span>
+                <span class="hourly_temp_holder" id="hourly_temp_7">45</span>
+                <span class="hourly_temp_holder" id="hourly_temp_8">65</span>
+              </div>
+              <div class="timeline_holder">
+                <div class="outer_bars">
+                  <div class="horizontal_bar">
+                    <div class="inner_bars"></div>
+                    <div class="inner_bars"></div>
+                    <div class="inner_bars"></div>
+                    <div class="inner_bars"></div>
+                    <div class="inner_bars"></div>
+                    <div class="inner_bars"></div>
+                    <div class="inner_bars"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="time_holder">
+                <span class="hourly_time_span">NOW</span>
+                <span class="hourly_time_span">6H</span>
+                <span class="hourly_time_span">12H</span>
+                <span class="hourly_time_span">18H</span>
+                <span class="hourly_time_span">24H</span>
+              </div>
+              <div class="hourly_day_holder">
+                <span class="day_left">Today</span><span class="day_right">Tomorrow</span>
+              </div>
+
+            </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="weekly_forecast">
+        <div class="wk_forecast_day">
+          <p class="weekday bottom_bar"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          <div class="wk_temps_small">
+          <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+          <p><span class="wk_forecast_temp_low"></span></p>
+            </div>
+        </div>
+        <div class="wk_forecast_day">
+          <p class="bottom_bar weekday"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+          <div class="wk_conditions_small">
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          </div>
+          <div class="wk_temps_small">
+            <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+            <p><span class="wk_forecast_temp_low"></span></p>
+          </div>
+        </div>
+        <div class="wk_forecast_day">
+          <p class="bottom_bar weekday"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+          <div class="wk_conditions_small">
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          </div>
+          <div class="wk_temps_small">
+            <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+            <p><span class="wk_forecast_temp_low"></span></p>
+          </div>
+        </div>
+        <div class="wk_forecast_day">
+          <p class="bottom_bar weekday"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+          <div class="wk_conditions_small">
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          </div>
+          <div class="wk_temps_small">
+            <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+            <p><span class="wk_forecast_temp_low"></span></p>
+          </div>
+        </div>
+        <div class="wk_forecast_day">
+          <p class="bottom_bar weekday"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+          <div class="wk_conditions_small">
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          </div>
+          <div class="wk_temps_small">
+            <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+            <p><span class="wk_forecast_temp_low"></span></p>
+          </div>
+        </div>
+        <div class="wk_forecast_day">
+          <p class="bottom_bar weekday"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+          <div class="wk_conditions_small">
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          </div>
+          <div class="wk_temps_small">
+            <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+            <p><span class="wk_forecast_temp_low"></span></p>
+          </div>
+        </div>
+
+        <div class="wk_forecast_day">
+          <p class="bottom_bar weekday"><span class="wk_forecast_day_text"></span> <span class="wk_forecast_day_date"></span></p>
+          <div class="wk_conditions_small">
+            <p class="conditions_box"><span class="wk_forecast_condition"></span></p>
+
+            <div class="weather_icon_wrap">
+              <div class="weather_icon"></div>
+            </div>
+          </div>
+          <div class="wk_temps_small">
+            <p class="bottom_bar"><span class="wk_forecast_temp_high"></span></p>
+            <p><span class="wk_forecast_temp_low"></span></p>
+          </div>
+        </div>
+        </div>
+      <figure></figure>
+    </div>
+  </div>
+  <script src="js/wjs.js"></script>
+</body>
+</html>
+

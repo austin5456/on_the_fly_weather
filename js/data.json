@@ -1,0 +1,32 @@
+﻿[
+  {
+    "name": "southern serenade",
+    "description": "a lot of text",
+    "cost": {
+      "weekend": "129",
+      "weekday": "99"
+    },
+    "details": [ "first dtail", "second detail", "third detail", "fourth detail" ],
+    "photo": "./imgs/pic0.jpg"
+  },
+  {
+    "name": "southern serenade1",
+    "description": "a lot of text",
+    "cost": {
+      "weekend": "129",
+      "weekday": "99"
+    },
+    "details": [ "first dtail", "second detail", "third detail", "fourth detail" ],
+    "photo": "./imgs/pic1.jpg"
+  },
+  {
+    "name": "southern serenade2",
+    "description": "a lot of text",
+    "cost": {
+      "weekend": "129",
+      "weekday": "99"
+    },
+    "details": [ "first dtail", "second detail", "third detail", "fourth detail" ],
+    "photo": "./imgs/pic2.jpg"
+  }
+]

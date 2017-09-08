@@ -1,0 +1,533 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+}
+.pad_override {
+    padding: 0;
+    padding-right: 0;
+    padding-left: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+html {
+    box-sizing: border-box;
+}
+.bottom_bar:after {
+    content: "";
+    border-top: 2px solid rgba(0,0,0,0.5);
+    width: 90%;
+    display: block;
+    margin: 12px auto 0 auto;
+    border-radius: 3px;
+}
+.global_wrap {
+    padding: 0 4%;
+    text-shadow: rgb(0,0,0) 2px 1px 1px;
+    position: relative;
+    overflow: hidden;
+    color: rgb(239,239,239);
+    background-image: -webkit-linear-gradient(
+        rgba(10,87,165,0.7) 0,
+        rgb(62,142,240) 10%,
+        rgb(138,205,255) 95%
+    );
+    /* mozilla horizon background-image: linear-gradient(-180deg,#092d6c 0,#10659c 40%,#7babbf 68%,#e9c39f 85%,#ff9a4a 100%);
+        prev: gb(69,132,180) 0,
+        rgb(31,71,120) 95%
+    */
+}
+
+.sun {
+    border-radius: 100%;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255,255,255,0.3);
+    background-image: -webkit-radial-gradient(circle, rgba(255,255,255,0.6) 10%, rgb(252,232,12) 85%);
+    background-image: -moz-radial-gradient(circle, rgba(255,255,255,0.6) 10%, rgb(252,232,12) 85%);
+    background-image: radial-gradient(circle, rgba(255,255,255,0.6) 10%, rgb(252,232,12) 85%);
+    /*background-image: url("../imgs/fullMoon.png");
+    background-size: 100%;*/
+}
+.sun_container {
+    border-radius: 100%;
+    box-shadow: 0 0 60px 20px rgba(252,232,12,1);
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    background-color: rgb(252,232,12);
+    top: 243px;
+    left: 82%;
+}
+.loader {
+    background-color: black;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    z-index: 100;
+    transition: 400ms;
+}
+header {
+    position: relative;
+    left: -5%;
+    width: 110%;;
+    padding:3px 0;
+    box-shadow: 0 2px 10px -1px rgb(0,0,0);
+    margin-top: 32px;
+    background-color: rgb(255,255,255);
+
+}
+header h1 {
+    color: rgb(132,183,230);
+    text-shadow:rgb(0,0,0) 1px 0 1px;
+    display: inline;
+    font-size: 1.5rem;
+}
+.title {
+    text-align: center;
+}
+.airplane {
+    height: 50px;
+    width: 50px;
+    display: inline-block;
+}
+.location_holder {
+    position: relative;
+    text-align: center;
+    margin: 24px 0;
+}
+.zip_container {
+    position: relative;
+    text-align: center;
+    padding: 6px;
+    margin-bottom: 24px;
+    font-weight: bold;
+}
+.zip_container input {
+    text-align: center;
+    display: block;
+    border: none;
+    border-radius: 6px;
+    margin: 6px auto;
+    clear: both;
+}
+.zip_container p {
+    display: inline;
+}
+.my_button {
+    position: relative;
+    top: -2px;
+    box-shadow: rgb(21, 100, 173) 3px 4px 0px 0px;
+    background: linear-gradient(rgb(121, 187, 255) 5%, rgb(55, 141, 229) 100%) rgb(121, 187, 255);
+    border-radius: 5px;
+    border: 1px solid rgb(51, 123, 196);
+    display: inline-block;
+    cursor: pointer;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 2px 18px;
+    text-decoration: none;
+    text-shadow: rgb(82, 142, 204) 0px 1px 0px;
+}
+.my_button:hover {
+    background: linear-gradient(rgb(55, 141, 229) 5%, rgb(121, 187, 255) 100%) rgb(55, 141, 229);
+    cursor: pointer;
+}
+.my_button:active {
+}
+
+.info_holder p {
+    margin: 0;
+}
+
+.current_conditions {
+    border-radius: 10px;
+    text-align: center;
+    font-size: 2em;
+}
+
+/*#region Time Box*/
+.time_box {
+    box-shadow: -3px 1px 0 0 rgba(16, 41, 67, 1);
+    border-radius: 12px;
+    padding-right: 0;
+    padding-left: 0;
+    background-color: rgba(0,0,0,0.6);
+    background-image: -webkit-linear-gradient(rgb(10,87,165) 1%, rgb(31, 131, 249) 18%, rgb(10,87,165) 54%, rgb(31, 131, 249) 82%, rgb(10,87,165) );
+    border: 1px solid rgba(0,0,0,0.6);
+}
+.time_box .weather_icon {
+    height: 116px;
+    width: 116px;
+    margin: 0 auto;
+}
+.time_box p {
+    display: inline-block;
+}
+.zone_title {
+    text-shadow: black 1px 1px 2px;
+    text-align: center;
+    margin-bottom: 16px;
+    padding-top: 15px;
+}
+
+.inner_time {
+    text-shadow: black 2px 2px 2px;
+    font-family: "Oswald", "sans-serif";
+    font-size: 3.2em;
+    text-align: center;
+}
+
+.seconds_holder {
+    display: inline-block;
+}
+
+.inner_time .seconds, .inner_time .ampm {
+    display: block;
+    font-size: 1.6rem;
+}
+ .inner_time .ampm {
+    margin-bottom: -12px;
+}
+ .temperature_text {
+    text-shadow: black 2px 2px 2px;
+    font-family: "Oswald", "sans-serif";
+    text-align: center;
+    font-size: 3.2em;
+}
+/*#endregion*/
+
+
+
+/*#region hourly_forecast_small*/
+
+.hourly_forecast_container {
+    box-shadow: -3px 1px 0 0 rgba(16, 41, 67, 1);
+    background-color: rgba(0,0,0,0.6);
+    border: 1px solid rgba(0,0,0,0.6);
+    border-radius: 12px;
+    height: auto;
+    overflow: hidden;
+    margin-top: 3.529411%;
+    background-image: -webkit-linear-gradient(rgb(10,87,165) 1%, rgb(31, 131, 249) 18%, rgb(10,87,165) 54%, rgb(31, 131, 249) 82%, rgb(10,87,165) );
+}
+.hourly_forecast {
+    height: 522px;
+    position: relative;
+    width: 236px;
+    margin: 0 auto;
+}
+
+.hour_img_holder {
+    position: relative;
+    top: -4px;
+    left: 10px;
+}
+.weather_icon_small {
+    background: url(../imgs/weather_icons_sprite.png);
+    background-size: 500%;
+    position: relative;
+    left: 180px;
+    height: 58px;
+    width: 58px;
+}
+.hourly_temp_holder {
+    display: block;
+    height: 58px;
+}
+.hourly_temp_wrap {
+    left: 160px;
+    position: absolute;
+    top: 12px;
+}
+.outer_bars {
+    position: absolute;
+    top: 24px;
+    left: 140px;
+    height: 89%;
+    width: 12px;
+    border-top: 1px solid rgb(0,0,0);
+    border-bottom: 1px solid rgb(0,0,0);
+}
+.horizontal_bar {
+    border-right: 1px solid rgb(0,0,0);
+    position: relative;
+    right: 5px;
+    height: 100%;
+}
+.inner_bars {
+    position: relative;
+    height: 12.5%;
+    width: 8px;
+    left: 7px;
+    border-bottom: 1px solid rgb(0,0,0);
+}
+.time_holder {
+    height: 110%;
+    position: absolute;
+    top: 12px;
+    left: 90px;
+}
+.hourly_time_span {
+    display: block;
+    height: 20%;
+}
+.hourly_day_holder {
+    position: absolute;
+    top: 0;
+}
+.day_left {
+    height: 480px;
+    display: block;
+    color: rgba(255,255,255,0.6);
+}
+.day_right {
+    color: rgba(255,255,255,0.6);
+}
+/*#endregion*/
+
+/*#region weekly forecast boxes*/
+
+.weekly_forecast {
+    margin-top: 3.529411%;
+    box-shadow: -3px 1px 0 0 rgb(16, 41, 67);
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.weekly_forecast .bottom_bar:after {
+    display: none;
+}
+
+.wk_forecast_day {
+    height: 86px;
+    border: 1px solid rgb(15, 64, 121);
+    position: relative;
+    background-image: -webkit-linear-gradient(left, rgb(10, 87, 165) 1%, rgb(31, 131, 249) 18%, rgb(57, 187, 237) 54%, rgb(31, 131, 249) 82%, rgb(10,87,165) 99% );
+}
+
+.weekday {
+    position: relative;
+    font-size: 1.2em;
+    top: 26px;
+    left: 20px;
+    margin-bottom: 0;
+}
+.weather_icon {
+    background: url(../imgs/weather_icons_sprite.png);
+    background-size: 500%;
+    height: 58px;
+    width: 58px;
+    margin: 0 auto;
+}
+.weather_icon_wrap {
+    position: relative;
+    text-align: center;
+    top: -14px;
+}
+.conditions_box {
+    display: none;
+}
+
+.wk_conditions_small {
+}
+.conditions_box {
+    margin: 0;
+}
+
+.wk_temps_small {
+    text-align: center;
+    padding-right: 20px;
+    position: absolute;
+    right: 0;
+    top: 9px;
+}
+/*#endregion*/
+
+
+@media (min-width: 576px) {
+
+    .sun_container {
+    border-radius: 100%;
+    box-shadow: 0 0 60px 20px rgba(252,232,12,1);
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    background-color: rgb(252,232,12);
+    top: 62px;
+    left: 82%;
+}
+    .zip_container input {
+    display: inline-block;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+    .hourly_forecast_container {
+    margin-top: 0;
+    margin-left: 3.529411%;
+    height: 100%;
+}
+
+}
+@media (min-width: 1024px) {
+    /*#region hourly_forecast*/
+.hourly_forecast {
+    width: 522px;
+    margin: 86px auto 0 auto;
+    height: auto;
+}
+.hour_img_holder {
+    position: relative;
+    top: -30px;
+    left: 0;
+}
+.weather_icon_small {
+    position: relative;
+    background: url(../imgs/weather_icons_sprite.png);
+    background-size: 500%;
+    height: 58px;
+    width: 58px;
+    margin: 0 auto;
+    float: left;
+    left: 0;
+}
+.hourly_temp_holder {
+    display: block;
+    width: 58px;
+    height: auto;
+    text-align: center;
+    float: left;
+}
+.hourly_temp_wrap {
+    position: static;
+}
+.outer_bars {
+    position: static;
+    width: 89%;
+    margin-left: 5.25%;
+    height: 12px;
+    clear: both;
+    border-left: 1px solid rgb(0,0,0);
+    border-right: 1px solid rgb(0,0,0);
+    border-top: none;
+    border-bottom: none;
+}
+.horizontal_bar {
+    width: 100%;
+    position: relative;
+    top: 5px;
+    border-bottom: 1px solid rgb(0,0,0);
+    border-right: none;
+    right: 0;
+    height: auto;
+}
+.inner_bars {
+    position: relative;
+    height: 8px;
+    top: -4px;
+    width: 12.5%;
+    border-right: 1px solid rgb(0,0,0);
+    float: left;
+    left: 0;
+    border-bottom: none;
+}
+.time_holder {
+    position: static;
+    width: 112%;
+    margin-left:-5.25%;
+    height: 12px;
+}
+.hourly_time_span {
+    display: block;
+    width: 20%;
+    text-align: center;
+    float: left;
+    height: auto;
+}
+.hourly_day_holder {
+    position: static;
+    margin-top: 2px;
+    width: 104%;
+}
+.day_left {
+    height: auto;
+    display: inline;
+    font-size: .75em;
+    float: left;
+    color: rgba(255,255,255,0.6);
+}
+.day_right {
+    margin-right: 20px;
+    font-size: .75em;
+    float: right;
+    color: rgba(255,255,255,0.6);
+}
+/*#endregion*/
+
+/*#region weekly forecast boxes*/
+
+    .weather_icon {
+    height: 116px;
+    width: 116px;
+    margin: 0 auto;
+}
+
+.weekly_forecast {
+    margin-top: 2.35525%;
+    box-shadow: none;
+    overflow: visible;
+}
+.weekly_forecast .bottom_bar:after {
+    display: block;
+}
+.weekly_forecast p {
+    margin: 0;
+    padding-top: 12px;
+    font-weight: 600;
+}
+
+.weekday {
+    position: static;
+    font-size: 1.1em;
+}
+
+.wk_forecast_day {
+    border: 1px solid rgb(16, 41, 67);
+    box-shadow: -3px 1px 0 0 rgb(16, 41, 67);
+    height: 322px;
+    display: block;
+    vertical-align: top;
+    float: left;
+    width: 13.61%;
+    margin-left: 0.786%;
+    text-align: center;
+    background-color: rgb(31, 131, 249);
+    background-image: -webkit-linear-gradient(rgb(10, 87, 165) 1%,     rgb(31, 131, 249) 18%,     rgb(57, 187, 237) 54%,     rgb(31, 131, 249) 82%,     rgb(10,87,165) 99% );
+    border-radius: 8px;
+}
+div.weekly_forecast div.wk_forecast_day:nth-child(1) {
+    margin-left: 0;
+
+}
+.conditions_box {
+    display: block;
+    height: 60px;
+}
+
+.weather_icon_wrap {
+    position: static;
+}
+.wk_temps_small {
+    text-align: center;
+    padding-right: 0;
+    position: static;
+}
+.wk_forecast_temp_high {
+    font-size: 1.2em;
+}
+
+/*#endregion*/
+
+
+}
