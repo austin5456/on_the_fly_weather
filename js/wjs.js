@@ -85,16 +85,17 @@ weatherForecast.onload = function () {
         var wk_forecast_icon = document.getElementsByClassName("weather_icon_wrap");
         var wk_forecast_condition = document.getElementsByClassName("wk_forecast_condition");
 
+
         for (var i = 0; i < 7; i++) {
 
-                wk_forecast_day_text[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.weekday;
-                wk_forecast_day_date[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.day;
-                wk_forecast_temp_high[i].textContent = "High " + fObj.forecast.simpleforecast.forecastday[i].high.fahrenheit + "°f";
-                wk_forecast_temp_low[i].textContent = "Low " + fObj.forecast.simpleforecast.forecastday[i].low.fahrenheit + "°f";
-                wk_forecast_condition[i].textContent = fObj.forecast.simpleforecast.forecastday[i].conditions;
-                iconSwapper(wk_forecast_icon[i].children[0], fObj.forecast.simpleforecast.forecastday[i].icon_url);
-
+            wk_forecast_day_text[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.weekday_short;
+            wk_forecast_day_date[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.day;
+            wk_forecast_temp_high[i].textContent = "High " + fObj.forecast.simpleforecast.forecastday[i].high.fahrenheit + "°f";
+            wk_forecast_temp_low[i].textContent = "Low " + fObj.forecast.simpleforecast.forecastday[i].low.fahrenheit + "°f";
+            wk_forecast_condition[i].textContent = fObj.forecast.simpleforecast.forecastday[i].conditions;
+            iconSwapper(wk_forecast_icon[i].children[0], fObj.forecast.simpleforecast.forecastday[i].icon_url);
         }
+
         //for the clock
         today_month.textContent = fObj.forecast.simpleforecast.forecastday["0"].date.monthname;
 
@@ -171,7 +172,6 @@ hourlyForecast.onload = function () {
 
         imLoading("Y");
     }
-
 }
 
 var pHours = document.getElementById("hours"),
@@ -239,24 +239,26 @@ update_date();
 setInterval(update_date, 1000);
 //sprite positions
 var icons = {
-    day_partlycloudy: "-25% 40%",
-    nt_partlycloudy: "0 -20%",
-    day_mostlycloudy: "75% 40%",
-    nt_mostlycloudy: "75% -20%",
+    day_partlycloudy: "-28% 39%",
+    nt_partlycloudy: "-3% -20%",
+    day_mostlycloudy: "73% 40%",
+    nt_mostlycloudy: "72% -20%",
     day_clear: "0 40%",
     nt_clear: "-25% -40%",
-    day_chancetstorms: "-75% -60%",
-    nt_chancetstorms: "25% 20%",
-    day_tstorms: "-6px -40%",
-    nt_tstorms: "50% 20%",
-    cloudy: "25% 60%",
-    nt_cloudy: "50% -20%",
-    chancerain: "0 60%",
-    nt_chancerain: "100% 0",
-    rain: "75% 60%",
-    nt_rain: "0 20%"
+    day_chancetstorms: "-77% -60%",
+    nt_chancetstorms: "22% 20%",
+    day_tstorms: "-3% -40%",
+    nt_tstorms: "47% 20%",
+    cloudy: "22% 60%",
+    nt_cloudy: "47% -20%",
+    chancerain: "-2% 60%",
+    nt_chancerain: "97% 0",
+    rain: "72.5% 59%",
+    nt_rain: "-3% 20%"
 }
 //sets the icons (when called upon)
+
+
 function iconSwapper(element, feed) {
     //console.log(feed); check which is wrong
     switch(feed) {
