@@ -144,6 +144,13 @@ hourlyForecast.onload = function () {
                 positionString += dayOrNight;
             }
 
+            var sun_moon = document.getElementsByClassName("sun")[0];
+
+            if (positionString.charAt(0) === "N") {
+                global_wrap.className = "global_wrap night_sky"
+                sun_moon.className = "moon";
+            }
+
             var num = { NNNN: 0, NNND: 1, NNDD: 2, NDDD: 3, DDDD: 4, DDDN: 5, DDNN: 6, DNNN: 7 }[positionString];
 
             if (window.matchMedia("(min-width: 1024px)").matches) {
