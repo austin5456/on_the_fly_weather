@@ -13,8 +13,7 @@ var current_weather = document.getElementById("current_weather");
 var current_temperature = document.getElementById("current_temperature");
 var current_weather_icon = document.getElementById("current_weather_icon");
 
-var startPoint;
-var redoCurrentTime;
+var timeZone;
 
 var loader = document.getElementsByClassName("loader")[0];
 var loadCheck = "";
@@ -77,6 +76,7 @@ weatherForecast.onload = function () {
     if (weatherForecast.status === 200) {
         fObj = JSON.parse(weatherForecast.responseText);
         console.log(fObj);
+        timeZone = fObj.forecast.simpleforecast.forecastday["0"].date.tz_short;
 
         var wk_forecast_day_text = document.getElementsByClassName("wk_forecast_day_text");
         var wk_forecast_day_date = document.getElementsByClassName("wk_forecast_day_date");
@@ -92,8 +92,8 @@ weatherForecast.onload = function () {
             wk_forecast_day_date[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.day;
             wk_forecast_temp_high[i].textContent = "High " + fObj.forecast.simpleforecast.forecastday[i].high.fahrenheit + "°f";
             wk_forecast_temp_low[i].textContent = "Low " + fObj.forecast.simpleforecast.forecastday[i].low.fahrenheit + "°f";
-            wk_forecast_condition[i].textContent = fObj.forecast.simpleforecast.forecastday[i].conditions;
             iconSwapper(wk_forecast_icon[i].children[0], fObj.forecast.simpleforecast.forecastday[i].icon_url);
+            wk_forecast_condition[i].textContent = fObj.forecast.simpleforecast.forecastday[i].conditions;
         }
 
         //for the clock
@@ -104,25 +104,29 @@ weatherForecast.onload = function () {
     }
 }
 
-var myHourlyVariables = {
-    icons: "hourly_icon_",
-    temperatures: "hourly_temp_"
-}
-
-for (var i = 0; i < 9; i++) {
-    window[myHourlyVariables.icons + i] = document.getElementById(myHourlyVariables.icons + i);
-    window[myHourlyVariables.temperatures + i] = document.getElementById(myHourlyVariables.temperatures + i);
-}
 
 hourlyForecast.onload = function () {
     if (hourlyForecast.status === 200) {
         hObj = JSON.parse(hourlyForecast.responseText);
         console.log(hObj);
 
+        //using for current condition, more accurate
         iconSwapper(current_weather_icon, hObj.hourly_forecast["0"].icon_url);
         today_month.textContent = hObj.hourly_forecast["0"].FCTTIME.month_name;
         current_weather.textContent = hObj.hourly_forecast["0"].condition;
-        current_temperature.textContent = hObj.hourly_forecast["0"].temp.english; //using for current condition, more accurate
+        current_temperature.textContent = hObj.hourly_forecast["0"].temp.english;
+        //end current conditions
+
+
+        var myHourlyVariables = {
+            icons: "hourly_icon_",
+            temperatures: "hourly_temp_"
+        }
+
+        for (var i = 0; i < 9; i++) {
+            window[myHourlyVariables.icons + i] = document.getElementById(myHourlyVariables.icons + i);
+            window[myHourlyVariables.temperatures + i] = document.getElementById(myHourlyVariables.temperatures + i);
+        }
 
         for (var i = 0; i < 9; i++) {
             iconSwapper(window["hourly_icon_" + i], hObj.hourly_forecast[i * 3].icon_url);
@@ -135,6 +139,7 @@ hourlyForecast.onload = function () {
             var dayOrNight;
             var positionString = "";
             for (var i = 0; i < 4; i++) {
+                // if in day hours
                 if (Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) >= 8 && Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) {
                     dayOrNight = "D";
                 }
@@ -153,21 +158,15 @@ hourlyForecast.onload = function () {
 
             var num = { NNNN: 0, NNND: 1, NNDD: 2, NDDD: 3, DDDD: 4, DDDN: 5, DDNN: 6, DNNN: 7 }[positionString];
 
-            if (window.matchMedia("(min-width: 1024px)").matches) {
-
+            if (window.matchMedia("(min-width: 1000px)").matches) {
                 for (var i = 0 + num; i < 9 + num; i++) {
-
                     window["hourly_icon_" + (i - num)].style.top = positionArray[i];
                 }
-
                 console.log("horizontal version");
             } else {
-
                 for (var i = 0 + num; i < 9 + num; i++) {
-
                     window["hourly_icon_" + (i - num)].style.top = "0";
                 }
-
                 console.log("vertical version");
             }
             document.getElementsByTagName("body")[0].onresize = function () {
@@ -187,44 +186,48 @@ var pHours = document.getElementById("hours"),
     pampm = document.getElementById("ampm"),
     ampm;
 
-var changeHour = true;
-var changeMinute = true;
-var update_date = function () {
-    var date = new Date(),
-        hours = date.getHours(),
-        minutes = date.getMinutes(),
-        seconds = date.getSeconds(),
-        day = date.getDay();
+function setTime() {
 
-    if (seconds === 0) {
-        changeMinute = true;
+    var date = new Date();
+    updateSeconds(date.getSeconds());
+    updateMinute(date.getMinutes());
+    updateHour(date.getHours());
+
+    var update_date = function () {
+
+        date = new Date();
+        var seconds = date.getSeconds();
+        updateSeconds(seconds);
+
+        if (seconds === 0) {
+            var minutes = date.getMinutes();
+            updateMinute(minutes);
+        }
+
+        if (minutes === 0 && seconds === 0) {
+            var hours = date.getHours();
+            updateHour(hours)
+        }
+
     }
 
-    if (minutes === 0 && seconds === 0) {
-        changeHour = true;
+    function updateSeconds(seconds) {
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        pSeconds.textContent = seconds;
     }
 
-    if (minutes < 10) {
-        minutes = "0" + minutes;
-    }
-    if (seconds < 10) {
-        seconds = "0" + seconds;
-    }
-
-    if (changeMinute === true) {
+    function updateMinute(minutes) {
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
         pMinutes.textContent = minutes;
-        changeMinute = false;
         console.log("minute change");
     }
-    if (changeHour === true) {
-        ampmChange();
-        changeHour = false;
-        console.log("hour change");
-    }
 
-
-    function ampmChange() {
-        console.log("ran ampmChange");
+    function updateHour(hours) {
+        console.log("hour/ampm change");
         if (hours >= 12) {
             hours -= 12;
             ampm = "PM";
@@ -237,13 +240,12 @@ var update_date = function () {
         }
         pampm.textContent = ampm;
         pHours.textContent = hours;
-
     }
 
-    pSeconds.textContent = seconds;
+    update_date();
+    setInterval(update_date, 1000);
 }
-update_date();
-setInterval(update_date, 1000);
+setTime();
 //sprite positions
 var icons = {
     day_partlycloudy: "-28% 39%",
@@ -256,7 +258,7 @@ var icons = {
     nt_chancetstorms: "22% 20%",
     day_tstorms: "-3% -40%",
     nt_tstorms: "47% 20%",
-    cloudy: "22% 60%",
+    cloudy: "22% 59%",
     nt_cloudy: "47% -20%",
     chancerain: "-2% 60%",
     nt_chancerain: "97% 0",
@@ -326,36 +328,23 @@ function iconSwapper(element, feed) {
 
 $(document).ready(function () {
     console.log("ready!");
+
 });
 
 loadWeather("76148");
 
-//this would go in the onload function
-// startPoint = cObj.current_observation.local_time_rfc822;
-// redoCurrentTime = startPoint.substr(17, 8);
-// console.log(redoCurrentTime);
-
-// timeRedo();
-
-// need a reliable time source
-function timeRedo() {
-    var timeArray = redoCurrentTime.split(":");
-    console.log(redoCurrentTime);
-    var redoHours = Number(timeArray[0]);
-    var redoMinutes = Number(timeArray[1]);
-    var redoSeconds = Number(timeArray[3]);
-}
-
 function imLoading(didILoad) {
     loadCheck += didILoad;
+    var myBody = document.getElementsByTagName("body")[0];
+    var loader_wrapper = document.getElementById("loader_wrapper");
     if (loadCheck === "YYY") {
 
         console.log("done Loading");
         setTimeout(function () {
-            loader.style.opacity = "0";
+            myBody.className = "loaded";
             setTimeout(function () {
-                loader.style.display = "none";
-            }, 400);
+                loader_wrapper.style.display = "none";
+            }, 1500);
         }, 150);
     }
     else {
