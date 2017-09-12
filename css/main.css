@@ -528,6 +528,9 @@ header h1 {
         margin-left: 8px;
         margin-right: 8px;
     }
+    .current_conditions {
+    font-size: 1.65em;
+}
     .hourly_forecast_container {
         margin-top: 0;
         margin-left: 3.529411%;
@@ -646,6 +649,11 @@ header h1 {
         color: rgba(255, 255, 255, 0.6);
     }
     /*#endregion*/
+
+    .current_conditions {
+    font-size: 2em;
+}
+
     /*#region weekly forecast boxes*/
     .weather_icon {
         height: 116px;
