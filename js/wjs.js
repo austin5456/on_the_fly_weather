@@ -18,13 +18,37 @@ var today_month = document.getElementById("today_month");
 var zip_button = document.getElementById("zip_button");
 var zip_input = document.getElementById("zip_input");
 zip_button.addEventListener("click", loadWeather);
+zip_input.addEventListener("keypress", zipKeypress);
+zip_input.addEventListener("focus", removePlaceholder);
+zip_input.addEventListener("blur", insertPlaceholder);
+var currentZipHolder = zip_input.getAttribute("placeholder");
+
+function removePlaceholder() {
+    zip_input.setAttribute("placeholder", "");
+}
+function insertPlaceholder() {
+    zip_input.setAttribute("placeholder", currentZipHolder);
+}
+function zipKeypress(event) {
+    if (event.charCode === 13) {
+        console.log("enter was pressed");
+        loadWeather(event);
+    }
+}
 
 function loadWeather(firstUseZip) {
+    console.log(firstUseZip);
+    //if (zip_input) {}
+   // if (firstUseZip == event) {
+        //console.log(firstUseZip)
+    //}
     var zip = zip_input.value;
     if (!zip) {
         zip = firstUseZip
     }
     if (zip.length === 5 && !isNaN(zip)) {
+        zip_input.setAttribute("placeholder", zip);
+        currentZipHolder = zip;
         var current_condition_path = "http://api.wunderground.com/api/238e926ce0161f62/conditions/q/" + zip + ".json";
         var weekly_forecast_path = "http://api.wunderground.com/api/238e926ce0161f62/forecast10day/q/" + zip + ".json";
         var hourly_forecast_path = "http://api.wunderground.com/api/238e926ce0161f62/hourly/q/" + zip + ".json";
@@ -37,7 +61,6 @@ function loadWeather(firstUseZip) {
         hourlyForecast.open("GET", hourly_forecast_path, true);
         hourlyForecast.responseType = "text";
         hourlyForecast.send(null);
-        var thisPotato;
     } else {
         console.log("nice try buddy");
     }
@@ -221,7 +244,9 @@ var icons = {
     chancerain: "-2% 60%",
     nt_chancerain: "97% 0",
     rain: "72.5% 59%",
-    nt_rain: "-3% 20%"
+    nt_rain: "-3% 20%",
+    fog: "25% 40%",
+    nt_fog: "25% -20%"
 }
 //sets the icons (when called upon)
 function iconSwapper(element, feed) {
@@ -274,6 +299,12 @@ function iconSwapper(element, feed) {
             break;
         case "http://icons.wxug.com/i/c/k/nt_rain.gif":
             element.style.backgroundPosition = icons.nt_rain;
+            break;
+        case "http://icons.wxug.com/i/c/k/fog.gif":
+            element.style.backgroundPosition = icons.fog;
+            break;
+        case "http://icons.wxug.com/i/c/k/nt_fog.gif":
+            element.style.backgroundPosition = icons.nt_fog;
             break;
         default:
             element.textContent = "CRAP! something's wrong with the feed";
