@@ -169,21 +169,106 @@ hourlyForecast.onload = function () {
         imLoading("Y");
     }
 }
+var startClock = (function () {
+    var clock = {
+        init: function () {
+            this.cacheDom();
+            this.domRenderInitial();
+            this.clockGears.startInterval();
+        },
+        cacheDom: function () {
+            this.pHours = document.getElementById("hours");
+            this.pMinutes = document.getElementById("minutes");
+            this.pSeconds = document.getElementById("seconds");
+            this.pAmpm = document.getElementById("ampm");
+        },
+        domRenderInitial: function () {
+            this.clockGears.extractTime();
+            this.clockGears.renderTick(this.pSeconds, this.clockGears.seconds);
+            this.clockGears.renderTick(this.pMinutes, this.clockGears.minutes);
+            this.clockGears.renderTick(this.pHours, this.clockGears.hours);
+            this.pAmpm.textContent = this.clockGears.ampm;
+        },
+        clockGears: {
+            startInterval: function () {
+                var myScope = this;
+                setInterval(function () {
+                    myScope.updateSeconds();
+                }, 1000);
+            },
+            extractTime: function () {
+                this.date = new Date();
+                this.seconds = this.date.getSeconds();
+                this.minutes = this.date.getMinutes();
+                this.hours = this.date.getHours();
+                this.ampm = (this.hours >= 12) ? "PM" : "AM";
+            },
+            updateSeconds: function () {
+                this.seconds += 1;
+                if (this.seconds === 60) {
+                    this.seconds = 0;
+                    this.updateMinutes();
+                }
+                this.renderTick(clock.pSeconds, this.seconds);
+            },
+            updateMinutes: function () {
+                this.minutes += 1;
+                if (this.minutes === 60) {
+                    this.minutes = 0;
+                    this.updateHours()
+                }
+                this.renderTick(clock.pMinutes, this.minutes);
+            },
+            updateHours: function () {
+                this.hours += 1;
+                this.hours = (this.hours === 24) ? 0 : this.hours;
+                if (this.hours >= 12) {
+                    this.hours -= 12;
+                    this.ampm = "PM"
+                }
+                else {
+                    this.ampm = "AM";
+                }
+                this.renderTick(clock.pAmpm, this.ampm);
+                this.renderTick(clock.pHours, this.hours);
+            },
+            renderTick: function (element, value) {
+                if (element === clock.pSeconds || element === clock.pMinutes) {
+                    value = (value <= 9) ? ("0" + value) : value;
+                }
+                if (element === clock.pHours) {
+                    value = (value >= 12 ? (value - 12) : value);
+                    value = (value === 0) ? 12 : value;
+                }
+                element.textContent = value;
+            }
+        }
+    }
+    clock.init();
+}())
+
+/*
+
 var pHours = document.getElementById("hours"),
     pMinutes = document.getElementById("minutes"),
     pSeconds = document.getElementById("seconds"),
     pampm = document.getElementById("ampm"),
     ampm;
 
+
 function setTime() {
+
     var date = new Date();
+
     updateSeconds(date.getSeconds());
     updateMinute(date.getMinutes());
     updateHour(date.getHours());
+
     var update_date = function () {
         date = new Date();
         var seconds = date.getSeconds();
         updateSeconds(seconds);
+
         if (seconds === 0) {
             var minutes = date.getMinutes();
             updateMinute(minutes);
@@ -227,6 +312,7 @@ function setTime() {
     setInterval(update_date, 1000);
 }
 setTime();
+*/
 //sprite positions
 var icons = {
     day_partlycloudy: "-28% 39%",
