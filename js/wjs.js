@@ -23,6 +23,10 @@ zip_input.addEventListener("focus", removePlaceholder);
 zip_input.addEventListener("blur", insertPlaceholder);
 var currentZipHolder = zip_input.getAttribute("placeholder");
 
+document.getElementsByTagName("body")[0].onresize = function () {
+    newHourlyForecast.mQueryPositions();
+};
+
 function removePlaceholder() {
     zip_input.setAttribute("placeholder", "");
 }
@@ -99,76 +103,86 @@ weatherForecast.onload = function () {
         imLoading("Y");
     }
 }
+
 hourlyForecast.onload = function () {
     if (hourlyForecast.status === 200) {
         hObj = JSON.parse(hourlyForecast.responseText);
         console.log(hObj);
-        //using for current condition, more accurate
+        newHourlyForecast.init();
+
+        //Body day/night style
+        var sun_moon = document.getElementById("sun_moon");
+        if (newHourlyForecast.positionString.charAt(0) === "N") {
+            global_wrap.className = "global_wrap night_sky";
+            sun_moon.className = "moon";
+        }
+        //using it for current conditions, its more accurate
         iconSwapper(current_weather_icon, hObj.hourly_forecast["0"].icon_url);
         today_month.textContent = hObj.hourly_forecast["0"].FCTTIME.month_name;
         current_weather.textContent = hObj.hourly_forecast["0"].condition;
         current_temperature.textContent = hObj.hourly_forecast["0"].temp.english;
-        //end current conditions
-        var myHourlyVariables = {
-            icons: "hourly_icon_",
-            temperatures: "hourly_temp_"
-        }
-        for (var i = 0; i < 9; i++) {
-            window[myHourlyVariables.icons + i] = document.getElementById(myHourlyVariables.icons + i);
-            window[myHourlyVariables.temperatures + i] = document.getElementById(myHourlyVariables.temperatures + i);
-        }
-        for (var i = 0; i < 9; i++) {
-            iconSwapper(window["hourly_icon_" + i], hObj.hourly_forecast[i * 3].icon_url);
-            window["hourly_temp_" + i].textContent = hObj.hourly_forecast[i * 3].temp.english + "°";
-        }
-
-        function dayNightPosition() {
-            var positionArray = ["30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px"];
-            var dayOrNight;
-            var positionString = "";
-            for (var i = 0; i < 4; i++) {
-                // if in day hours
-                if (Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) >= 8 && Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) {
-                    dayOrNight = "D";
-                } else {
-                    dayOrNight = "N";
-                }
-                positionString += dayOrNight;
-            }
-            var sun_moon = document.getElementById("sun_moon");
-            if (positionString.charAt(0) === "N") {
-                global_wrap.className = "global_wrap night_sky"
-                sun_moon.className = "moon";
-            }
-            var num = {
-                NNNN: 0,
-                NNND: 1,
-                NNDD: 2,
-                NDDD: 3,
-                DDDD: 4,
-                DDDN: 5,
-                DDNN: 6,
-                DNNN: 7
-            }[positionString];
-            if (window.matchMedia("(min-width: 1000px)").matches) {
-                for (var i = 0 + num; i < 9 + num; i++) {
-                    window["hourly_icon_" + (i - num)].style.top = positionArray[i];
-                }
-                console.log("horizontal version");
-            } else {
-                for (var i = 0 + num; i < 9 + num; i++) {
-                    window["hourly_icon_" + (i - num)].style.top = "0";
-                }
-                console.log("vertical version");
-            }
-            document.getElementsByTagName("body")[0].onresize = function () {
-                dayNightPosition();
-            }
-        }
-        dayNightPosition();
-        imLoading("Y");
     }
 }
+
+var newHourlyForecast = {
+    init: function () {
+        this.getData();
+        this.cacheDom();
+        this.setValues();
+        this.dayVsNight();
+        this.mQueryPositions();
+        imLoading("Y");
+    },
+    cacheDom: function () {
+        this.icons = document.getElementsByClassName("weather_icon_small");
+        this.temps = document.getElementsByClassName("hourly_temp_holder");
+    },
+    getData: function() {
+            if (hourlyForecast.status === 200) {
+                this.hObj = JSON.parse(hourlyForecast.responseText);
+            }
+
+    },
+    setValues: function() {
+        for (var i = 0; i < 9; i++) {
+            iconSwapper(newHourlyForecast.icons[i], this.hObj.hourly_forecast[i * 3].icon_url);
+            this.temps[i].textContent = this.hObj.hourly_forecast[i * 3].temp.english + "°";
+        }
+    },
+    dayVsNight: function () {
+        this.positionArray = ["30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px"];
+        var dayOrNight;
+        this.positionString = "";
+        for (var i = 0; i < 4; i++) {
+            // if in day hours
+            dayOrNight = (Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour >= 8 && Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) ? "D" : "N");
+            this.positionString += dayOrNight;
+        }
+        this.arrayLocation = {
+            NNNN: 0,
+            NNND: 1,
+            NNDD: 2,
+            NDDD: 3,
+            DDDD: 4,
+            DDDN: 5,
+            DDNN: 6,
+            DNNN: 7
+        }[this.positionString];
+    },
+    mQueryPositions: function () {
+        if (window.matchMedia("(min-width: 1000px)").matches) {
+            for (var i = 0 + this.arrayLocation; i < 9 + this.arrayLocation; i++) {
+               this.icons[(i - this.arrayLocation)].style.top = this.positionArray[i];
+            }
+            console.log("horizontal version");
+        } else {
+            for (var i = 0 + this.arrayLocation; i < 9 + this.arrayLocation; i++) {
+               this.icons[(i - this.arrayLocation)].style.top = "0";
+            }
+            console.log("vertical version");
+        }
+    }
+};
 var startClock = (function () {
     var clock = {
         init: function () {
@@ -247,72 +261,7 @@ var startClock = (function () {
     clock.init();
 }())
 
-/*
 
-var pHours = document.getElementById("hours"),
-    pMinutes = document.getElementById("minutes"),
-    pSeconds = document.getElementById("seconds"),
-    pampm = document.getElementById("ampm"),
-    ampm;
-
-
-function setTime() {
-
-    var date = new Date();
-
-    updateSeconds(date.getSeconds());
-    updateMinute(date.getMinutes());
-    updateHour(date.getHours());
-
-    var update_date = function () {
-        date = new Date();
-        var seconds = date.getSeconds();
-        updateSeconds(seconds);
-
-        if (seconds === 0) {
-            var minutes = date.getMinutes();
-            updateMinute(minutes);
-        }
-        if (minutes === 0 && seconds === 0) {
-            var hours = date.getHours();
-            updateHour(hours)
-        }
-    }
-
-    function updateSeconds(seconds) {
-        if (seconds < 10) {
-            seconds = "0" + seconds;
-        }
-        pSeconds.textContent = seconds;
-    }
-
-    function updateMinute(minutes) {
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-        pMinutes.textContent = minutes;
-        console.log("minute change");
-    }
-
-    function updateHour(hours) {
-        console.log("hour/ampm change");
-        if (hours >= 12) {
-            hours -= 12;
-            ampm = "PM";
-        } else {
-            ampm = "AM";
-        }
-        if (hours === 0) {
-            hours = 12;
-        }
-        pampm.textContent = ampm;
-        pHours.textContent = hours;
-    }
-    update_date();
-    setInterval(update_date, 1000);
-}
-setTime();
-*/
 //sprite positions
 var icons = {
     day_partlycloudy: "-28% 39%",
@@ -418,3 +367,138 @@ function imLoading(didILoad) {
         console.log("still Loading");
     }
 }
+
+
+/*
+Old weather conditiosn function
+
+//using for current condition, more accurate
+        iconSwapper(current_weather_icon, hObj.hourly_forecast["0"].icon_url);
+        today_month.textContent = hObj.hourly_forecast["0"].FCTTIME.month_name;
+        current_weather.textContent = hObj.hourly_forecast["0"].condition;
+        current_temperature.textContent = hObj.hourly_forecast["0"].temp.english;
+        //end current conditions
+        var myHourlyVariables = {
+            icons: "hourly_icon_",
+            temperatures: "hourly_temp_"
+        }
+        for (var i = 0; i < 9; i++) {
+            window[myHourlyVariables.icons + i] = document.getElementById(myHourlyVariables.icons + i);
+            window[myHourlyVariables.temperatures + i] = document.getElementById(myHourlyVariables.temperatures + i);
+        }
+        for (var i = 0; i < 9; i++) {
+            iconSwapper(window["hourly_icon_" + i], hObj.hourly_forecast[i * 3].icon_url);
+            window["hourly_temp_" + i].textContent = hObj.hourly_forecast[i * 3].temp.english + "°";
+        }
+
+        function dayNightPosition() {
+            var positionArray = ["30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px"];
+            var dayOrNight;
+            var positionString = "";
+            for (var i = 0; i < 4; i++) {
+                // if in day hours
+                if (Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) >= 8 && Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) {
+                    dayOrNight = "D";
+                } else {
+                    dayOrNight = "N";
+                }
+                positionString += dayOrNight;
+            }
+            var sun_moon = document.getElementById("sun_moon");
+            if (positionString.charAt(0) === "N") {
+                global_wrap.className = "global_wrap night_sky";
+                sun_moon.className = "moon";
+            }
+            var num = {
+                NNNN: 0,
+                NNND: 1,
+                NNDD: 2,
+                NDDD: 3,
+                DDDD: 4,
+                DDDN: 5,
+                DDNN: 6,
+                DNNN: 7
+            }[positionString];
+            if (window.matchMedia("(min-width: 1000px)").matches) {
+                for (var i = 0 + num; i < 9 + num; i++) {
+                    window["hourly_icon_" + (i - num)].style.top = positionArray[i];
+                }
+                console.log("horizontal version");
+            } else {
+                for (var i = 0 + num; i < 9 + num; i++) {
+                    window["hourly_icon_" + (i - num)].style.top = "0";
+                }
+                console.log("vertical version");
+            }
+        }
+        dayNightPosition();
+        imLoading("Y");
+*/
+
+/*
+Old clock function
+
+var pHours = document.getElementById("hours"),
+    pMinutes = document.getElementById("minutes"),
+    pSeconds = document.getElementById("seconds"),
+    pampm = document.getElementById("ampm"),
+    ampm;
+
+
+function setTime() {
+
+    var date = new Date();
+
+    updateSeconds(date.getSeconds());
+    updateMinute(date.getMinutes());
+    updateHour(date.getHours());
+
+    var update_date = function () {
+        date = new Date();
+        var seconds = date.getSeconds();
+        updateSeconds(seconds);
+
+        if (seconds === 0) {
+            var minutes = date.getMinutes();
+            updateMinute(minutes);
+        }
+        if (minutes === 0 && seconds === 0) {
+            var hours = date.getHours();
+            updateHour(hours)
+        }
+    }
+
+    function updateSeconds(seconds) {
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        pSeconds.textContent = seconds;
+    }
+
+    function updateMinute(minutes) {
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        pMinutes.textContent = minutes;
+        console.log("minute change");
+    }
+
+    function updateHour(hours) {
+        console.log("hour/ampm change");
+        if (hours >= 12) {
+            hours -= 12;
+            ampm = "PM";
+        } else {
+            ampm = "AM";
+        }
+        if (hours === 0) {
+            hours = 12;
+        }
+        pampm.textContent = ampm;
+        pHours.textContent = hours;
+    }
+    update_date();
+    setInterval(update_date, 1000);
+}
+setTime();
+*/
