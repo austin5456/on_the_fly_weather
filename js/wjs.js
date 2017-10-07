@@ -1,151 +1,282 @@
 ﻿"use strict";
-var global_wrap = document.getElementsByClassName("global_wrap")[0];
-var weatherConditions = new XMLHttpRequest();
-var weatherForecast = new XMLHttpRequest();
-var hourlyForecast = new XMLHttpRequest();
-var cObj;
-var fObj;
-var hObj;
-var city = document.getElementById("city");
-var state = document.getElementById("state");
-var current_weather = document.getElementById("current_weather");
-var current_temperature = document.getElementById("current_temperature");
-var current_weather_icon = document.getElementById("current_weather_icon");
-var timeZone;
-var loader = document.getElementsByClassName("loader")[0];
-var loadCheck = "";
-var today_month = document.getElementById("today_month");
-var zip_button = document.getElementById("zip_button");
-var zip_input = document.getElementById("zip_input");
-zip_button.addEventListener("click", loadWeather);
-zip_input.addEventListener("keypress", zipKeypress);
-zip_input.addEventListener("focus", removePlaceholder);
-zip_input.addEventListener("blur", insertPlaceholder);
-var currentZipHolder = zip_input.getAttribute("placeholder");
 
-document.getElementsByTagName("body")[0].onresize = function () {
-    newHourlyForecast.mQueryPositions();
+var startPage = {
+    init: function (firstZip) {
+        masterHandler.init();
+        zipHandler.init(firstZip);
+    }
+}
+
+var loadChecker = {
+    items: [],
+    init: function (numberOfItems) {
+        this.itemsLoaded = 0;
+        this.itemsToLoad = numberOfItems;
+        this.cacheDom();
+    },
+    cacheDom: function(){
+        this.myBody = document.getElementsByTagName("body")[0];
+        this.loader_wrapper = document.getElementById("loader_wrapper");
+    },
+    iLoaded: function (itemName) {
+        this.items.push(itemName);
+        this.itemsLoaded += 1;
+        this.doneLoading();
+    },
+    doneLoading: function () {
+        var myScope = this;
+        if (this.itemsLoaded === this.itemsToLoad) {
+            this.dataDependantStyles();
+            console.log("done Loading");
+            setTimeout(function () {
+                myScope.myBody.className = "loaded";
+                setTimeout(function () {
+                    myScope.loader_wrapper.style.display = "none";
+                }, 1500);
+            }, 150);
+        }
+    },
+    dataDependantStyles: function () {
+        stylesAfterLoad.init();
+    }
+}
+loadChecker.init(3);
+
+var stylesAfterLoad = {
+    name: "stylesAfterLoad",
+    init: function () {
+        this.cacheDom();
+        this.onRezise();
+        this.dayNightBG();
+    },
+    cacheDom: function () {
+        this.globalWrap = document.getElementsByClassName("global_wrap")[0];
+        this.sunMoon = document.getElementById("sun_moon");
+    },
+    onRezise: function () {
+        document.getElementsByTagName("body")[0].onresize = function () {
+            hourlyForecastM.mQueryPositions();
+        };
+    },
+    dayNightBG: function () {
+        var sunMoon = document.getElementById("sun_moon");
+        if (hourlyForecastM.positionString.charAt(0) === "N") {
+            this.globalWrap.className = "global_wrap night_sky";
+            this.sunMoon.className = "moon";
+        }
+    }
+}
+
+var requestLog = {
+    dependants: {},
+    requestsMade: [],
+    addDependants: function (dependant, dependantOn) {
+        this.dependants[dependant] = dependantOn;
+    },
+    addReqMade: function (req) {
+        this.requestsMade.push(req);
+    }
 };
 
-function removePlaceholder() {
-    zip_input.setAttribute("placeholder", "");
-}
-function insertPlaceholder() {
-    zip_input.setAttribute("placeholder", currentZipHolder);
-}
-function zipKeypress(event) {
-    if (event.charCode === 13) {
-        console.log("enter was pressed");
-        loadWeather(event);
-    }
+
+var zipHandler = {
+    name: "zipHandler",
+    init: function (zip) {
+        this.cacheDom();
+        this.addEvents();
+        this.loadNewLocation(zip)
+
+    },
+    cacheDom: function () {
+        this.zipButton = document.getElementById("zip_button");
+        this.zipInput = document.getElementById("zip_input");
+    },
+    addEvents: function () {
+        var myScope = this;
+        this.zipButton.addEventListener("click", this.checkZip.bind(this));
+        this.zipInput.addEventListener("keypress", this.checkZip.bind(this));
+        this.zipInput.addEventListener("focus", this.placeholderManager.bind(this));
+        this.zipInput.addEventListener("blur", this.placeholderManager.bind(this));
+    },
+    checkZip: function (e) {
+        if (e.charCode === 13 || e.type === "click") {
+            if (this.zipInput.value.length === 5 && !isNaN(this.zipInput.value)) {
+                this.extractValue();
+            }
+        }
+    },
+    extractValue: function () {
+        this.zip = this.zipInput.value;
+        this.zipInput.value = "";
+        this.placeholderManager("");
+        this.loadNewLocation(this.zip);
+    },
+    placeholderManager: function (e) {
+        var currentZip = (this.zip) ? this.zip : "76148";
+        var myPlaceholder = (e.type === "focus") ? "" : currentZip;
+        this.zipInput.setAttribute("placeholder", myPlaceholder);
+    },
+    initialPageRender: function(){
+    },
+    loadNewLocation: function (zip) {
+        masterHandler.handleData(zip);
+    },
 }
 
-function loadWeather(firstUseZip) {
-    console.log(firstUseZip);
-    //if (zip_input) {}
-   // if (firstUseZip == event) {
-        //console.log(firstUseZip)
-    //}
-    var zip = zip_input.value;
-    if (!zip) {
-        zip = firstUseZip
-    }
-    if (zip.length === 5 && !isNaN(zip)) {
-        zip_input.setAttribute("placeholder", zip);
-        currentZipHolder = zip;
+
+var masterHandler = {
+    name: "masterHandler",
+    init: function (userZip) {
+        this.startModules();
+    },
+    handleData: function(userZip){
+        this.pullData(userZip);
+        this.loadAndInit();
+    },
+    startModules: function () {
+        locationM.init();
+        hourlyForecastM.init();
+        currentConditionsM.init();
+        weeklyForecastM.init();
+    },
+    pullData: function (userZip) {
+        this.weatherConditions = new XMLHttpRequest();
+        this.weatherForecast = new XMLHttpRequest();
+        this.hourlyForecast = new XMLHttpRequest();
+        var zip = userZip;
+
         var current_condition_path = "http://api.wunderground.com/api/238e926ce0161f62/conditions/q/" + zip + ".json";
         var weekly_forecast_path = "http://api.wunderground.com/api/238e926ce0161f62/forecast10day/q/" + zip + ".json";
         var hourly_forecast_path = "http://api.wunderground.com/api/238e926ce0161f62/hourly/q/" + zip + ".json";
-        weatherConditions.open("GET", current_condition_path, true);
-        weatherConditions.responseType = "text";
-        weatherConditions.send(null);
-        weatherForecast.open("GET", weekly_forecast_path, true);
-        weatherForecast.responseType = "text";
-        weatherForecast.send(null);
-        hourlyForecast.open("GET", hourly_forecast_path, true);
-        hourlyForecast.responseType = "text";
-        hourlyForecast.send(null);
-    } else {
-        console.log("nice try buddy");
-    }
-    zip_input.value = "";
-}
-weatherConditions.onload = function () {
-    if (weatherConditions.status === 200) {
-        cObj = JSON.parse(weatherConditions.responseText);
-        console.log(cObj);
-        city.textContent = cObj.current_observation.display_location.city;
-        state.textContent = cObj.current_observation.display_location.state_name;
-        imLoading("Y");
-    }
-}
-weatherForecast.onload = function () {
-    if (weatherForecast.status === 200) {
-        fObj = JSON.parse(weatherForecast.responseText);
-        console.log(fObj);
-        timeZone = fObj.forecast.simpleforecast.forecastday["0"].date.tz_short;
-        var wk_forecast_day_text = document.getElementsByClassName("wk_forecast_day_text");
-        var wk_forecast_day_date = document.getElementsByClassName("wk_forecast_day_date");
-        var wk_forecast_temp_high = document.getElementsByClassName("wk_forecast_temp_high");
-        var wk_forecast_temp_low = document.getElementsByClassName("wk_forecast_temp_low");
-        var wk_forecast_icon = document.getElementsByClassName("weather_icon_wrap");
-        var wk_forecast_condition = document.getElementsByClassName("wk_forecast_condition");
-        for (var i = 0; i < 7; i++) {
-            wk_forecast_day_text[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.weekday_short;
-            wk_forecast_day_date[i].textContent = fObj.forecast.simpleforecast.forecastday[i].date.day;
-            wk_forecast_temp_high[i].textContent = "High " + fObj.forecast.simpleforecast.forecastday[i].high.fahrenheit + "°f";
-            wk_forecast_temp_low[i].textContent = "Low " + fObj.forecast.simpleforecast.forecastday[i].low.fahrenheit + "°f";
-            iconSwapper(wk_forecast_icon[i].children[0], fObj.forecast.simpleforecast.forecastday[i].icon_url);
-            wk_forecast_condition[i].textContent = fObj.forecast.simpleforecast.forecastday[i].conditions;
+
+        this.weatherConditions.open("GET", current_condition_path, true);
+        this.weatherConditions.responseType = "text";
+        this.weatherConditions.send(null);
+
+        this.weatherForecast.open("GET", weekly_forecast_path, true);
+        this.weatherForecast.responseType = "text";
+        this.weatherForecast.send(null);
+
+        this.hourlyForecast.open("GET", hourly_forecast_path, true);
+        this.hourlyForecast.responseType = "text";
+        this.hourlyForecast.send(null);
+    },
+    loadAndInit: function () {
+        var myScope = this;
+        this.weatherConditions.onload = function () {
+            if (this.status === 200) {
+                var reqName = "currentConditions";
+                myScope.cObj = JSON.parse(this.responseText);
+                console.log(myScope.cObj);
+                locationM.render(myScope.cObj);
+                loadChecker.iLoaded();
+                requestLog.addReqMade(reqName);
+            }
         }
-        //for the clock
-        today_month.textContent = fObj.forecast.simpleforecast.forecastday["0"].date.monthname;
-        imLoading("Y");
-    }
-}
-
-hourlyForecast.onload = function () {
-    if (hourlyForecast.status === 200) {
-        hObj = JSON.parse(hourlyForecast.responseText);
-        console.log(hObj);
-        newHourlyForecast.init();
-
-        //Body day/night style
-        var sun_moon = document.getElementById("sun_moon");
-        if (newHourlyForecast.positionString.charAt(0) === "N") {
-            global_wrap.className = "global_wrap night_sky";
-            sun_moon.className = "moon";
+        this.hourlyForecast.onload = function () {
+            if (this.status === 200) {
+                var reqName = "hourlyForecast";
+                myScope.hObj = JSON.parse(this.responseText);
+                console.log(myScope.hObj);
+                hourlyForecastM.render(myScope.hObj);
+                currentConditionsM.render(myScope.hObj);
+                loadChecker.iLoaded();
+                requestLog.addReqMade(reqName);
+            }
         }
-        //using it for current conditions, its more accurate
-        iconSwapper(current_weather_icon, hObj.hourly_forecast["0"].icon_url);
-        today_month.textContent = hObj.hourly_forecast["0"].FCTTIME.month_name;
-        current_weather.textContent = hObj.hourly_forecast["0"].condition;
-        current_temperature.textContent = hObj.hourly_forecast["0"].temp.english;
+        this.weatherForecast.onload = function () {
+            if (this.status === 200) {
+                var reqName = "weeklyForecast";
+                myScope.fObj = JSON.parse(this.responseText);
+                console.log(myScope.fObj);
+                weeklyForecastM.render(myScope.fObj);
+                loadChecker.iLoaded();
+                requestLog.addReqMade(reqName);
+            }
+        }
     }
 }
-
-var newHourlyForecast = {
-    init: function () {
-        this.getData();
+var locationM = {
+    name: "locationM",
+    init: function (data) {
         this.cacheDom();
+        this.addDependency();
+    },
+    addDependency: function() {
+        requestLog.addDependants(this.name, "currentConditions");
+    },
+    render: function (data) {
+        this.getData(data);
+        this.setValues();
+    },
+    cacheDom: function () {
+        this.city = document.getElementById("city");
+        this.state = document.getElementById("state");
+    },
+    getData: function (data) {
+        this.cObj = data;
+    },
+    setValues: function () {
+        this.city.textContent = this.cObj.current_observation.display_location.city;
+        this.state.textContent = this.cObj.current_observation.display_location.state_name;
+    }
+}
+var currentConditionsM = {
+    name: "currentConditionsM",
+    init: function (data) {
+        this.cacheDom();
+        this.addDependency();
+    },
+    addDependency: function () {
+        requestLog.addDependants(this.name, "hourlyForecast");
+    },
+    render: function(data) {
+        this.getData(data);
+        this.setValues();
+    },
+    cacheDom: function () {
+        this.monthEle = document.getElementById("today_month");
+        this.currentWeatherEle = document.getElementById("current_weather");
+        this.currentTempEle = document.getElementById("current_temperature");
+        this.curWeatherIconEle = document.getElementById("current_weather_icon");
+    },
+    getData: function (data) {
+        //uses hourly data, it's more accurate
+        this.hObj = data;
+    },
+    setValues: function () {
+        iconSwapper(this.curWeatherIconEle, this.hObj.hourly_forecast["0"].icon_url);
+        this.monthEle.textContent = this.hObj.hourly_forecast["0"].FCTTIME.month_name;
+        this.currentWeatherEle.textContent = this.hObj.hourly_forecast["0"].condition;
+        this.currentTempEle.textContent = this.hObj.hourly_forecast["0"].temp.english;
+    }
+}
+
+var hourlyForecastM = {
+    name: "hourlyForecastM",
+    init: function (data) {
+        this.cacheDom();
+        this.addDependency();
+    },
+    addDependency: function () {
+        requestLog.addDependants(this.name, "hourlyForecast");
+    },
+    render: function (data) {
+        this.getData(data);
         this.setValues();
         this.dayVsNight();
         this.mQueryPositions();
-        imLoading("Y");
     },
     cacheDom: function () {
         this.icons = document.getElementsByClassName("weather_icon_small");
         this.temps = document.getElementsByClassName("hourly_temp_holder");
     },
-    getData: function() {
-            if (hourlyForecast.status === 200) {
-                this.hObj = JSON.parse(hourlyForecast.responseText);
-            }
-
+    getData: function (data) {
+        this.hObj = data;
     },
-    setValues: function() {
+    setValues: function () {
         for (var i = 0; i < 9; i++) {
-            iconSwapper(newHourlyForecast.icons[i], this.hObj.hourly_forecast[i * 3].icon_url);
+            iconSwapper(hourlyForecastM.icons[i], this.hObj.hourly_forecast[i * 3].icon_url);
             this.temps[i].textContent = this.hObj.hourly_forecast[i * 3].temp.english + "°";
         }
     },
@@ -155,7 +286,7 @@ var newHourlyForecast = {
         this.positionString = "";
         for (var i = 0; i < 4; i++) {
             // if in day hours
-            dayOrNight = (Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour >= 8 && Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) ? "D" : "N");
+            dayOrNight = (Number(this.hObj.hourly_forecast[(i * 3)].FCTTIME.hour >= 8 && Number(this.hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) ? "D" : "N");
             this.positionString += dayOrNight;
         }
         this.arrayLocation = {
@@ -172,17 +303,55 @@ var newHourlyForecast = {
     mQueryPositions: function () {
         if (window.matchMedia("(min-width: 1000px)").matches) {
             for (var i = 0 + this.arrayLocation; i < 9 + this.arrayLocation; i++) {
-               this.icons[(i - this.arrayLocation)].style.top = this.positionArray[i];
+                this.icons[(i - this.arrayLocation)].style.top = this.positionArray[i];
             }
             console.log("horizontal version");
         } else {
             for (var i = 0 + this.arrayLocation; i < 9 + this.arrayLocation; i++) {
-               this.icons[(i - this.arrayLocation)].style.top = "0";
+                this.icons[(i - this.arrayLocation)].style.top = "0";
             }
             console.log("vertical version");
         }
     }
 };
+
+
+var weeklyForecastM = {
+    name: "weeklyForecastM",
+    init: function (data) {
+        this.cacheDom();
+        this.addDependency();
+    },
+    addDependency: function () {
+        requestLog.addDependants(this.name, "weeklyForecast");
+    },
+    render: function (data) {
+        this.getData(data);
+        this.setValues();
+    },
+    cacheDom: function () {
+        this.wk_forecast_day_text = document.getElementsByClassName("wk_forecast_day_text");
+        this.wk_forecast_day_date = document.getElementsByClassName("wk_forecast_day_date");
+        this.wk_forecast_temp_high = document.getElementsByClassName("wk_forecast_temp_high");
+        this.wk_forecast_temp_low = document.getElementsByClassName("wk_forecast_temp_low");
+        this.wk_forecast_icon = document.getElementsByClassName("weather_icon_wrap");
+        this.wk_forecast_condition = document.getElementsByClassName("wk_forecast_condition");
+    },
+    getData: function (data) {
+            this.fObj = data;
+    },
+    setValues: function () {
+        for (var i = 0; i < 7; i++) {
+            this.wk_forecast_day_text[i].textContent = this.fObj.forecast.simpleforecast.forecastday[i].date.weekday_short;
+            this.wk_forecast_day_date[i].textContent = this.fObj.forecast.simpleforecast.forecastday[i].date.day;
+            this.wk_forecast_temp_high[i].textContent = "High " + this.fObj.forecast.simpleforecast.forecastday[i].high.fahrenheit + "°f";
+            this.wk_forecast_temp_low[i].textContent = "Low " + this.fObj.forecast.simpleforecast.forecastday[i].low.fahrenheit + "°f";
+            iconSwapper(this.wk_forecast_icon[i].children[0], this.fObj.forecast.simpleforecast.forecastday[i].icon_url);
+            this.wk_forecast_condition[i].textContent = this.fObj.forecast.simpleforecast.forecastday[i].conditions;
+        }
+    }
+};
+
 var startClock = (function () {
     var clock = {
         init: function () {
@@ -270,7 +439,7 @@ var icons = {
     nt_mostlycloudy: "72% -20%",
     day_clear: "0 40%",
     nt_clear: "-25% -40%",
-    day_chancetstorms: "-77% -60%",
+    day_chancetstorms: "-78% -60%",
     nt_chancetstorms: "22% 20%",
     day_tstorms: "-3% -40%",
     nt_tstorms: "47% 20%",
@@ -278,7 +447,7 @@ var icons = {
     nt_cloudy: "47% -20%",
     chancerain: "-2% 60%",
     nt_chancerain: "97% 0",
-    rain: "72.5% 59%",
+    rain: "72.5% 60%",
     nt_rain: "-3% 20%",
     fog: "25% 40%",
     nt_fog: "25% -20%"
@@ -346,159 +515,4 @@ function iconSwapper(element, feed) {
             break;
     }
 }
-$(document).ready(function () {
-    console.log("ready!");
-});
-loadWeather("76148");
-
-function imLoading(didILoad) {
-    loadCheck += didILoad;
-    var myBody = document.getElementsByTagName("body")[0];
-    var loader_wrapper = document.getElementById("loader_wrapper");
-    if (loadCheck === "YYY") {
-        console.log("done Loading");
-        setTimeout(function () {
-            myBody.className = "loaded";
-            setTimeout(function () {
-                loader_wrapper.style.display = "none";
-            }, 1500);
-        }, 150);
-    } else {
-        console.log("still Loading");
-    }
-}
-
-
-/*
-Old weather conditiosn function
-
-//using for current condition, more accurate
-        iconSwapper(current_weather_icon, hObj.hourly_forecast["0"].icon_url);
-        today_month.textContent = hObj.hourly_forecast["0"].FCTTIME.month_name;
-        current_weather.textContent = hObj.hourly_forecast["0"].condition;
-        current_temperature.textContent = hObj.hourly_forecast["0"].temp.english;
-        //end current conditions
-        var myHourlyVariables = {
-            icons: "hourly_icon_",
-            temperatures: "hourly_temp_"
-        }
-        for (var i = 0; i < 9; i++) {
-            window[myHourlyVariables.icons + i] = document.getElementById(myHourlyVariables.icons + i);
-            window[myHourlyVariables.temperatures + i] = document.getElementById(myHourlyVariables.temperatures + i);
-        }
-        for (var i = 0; i < 9; i++) {
-            iconSwapper(window["hourly_icon_" + i], hObj.hourly_forecast[i * 3].icon_url);
-            window["hourly_temp_" + i].textContent = hObj.hourly_forecast[i * 3].temp.english + "°";
-        }
-
-        function dayNightPosition() {
-            var positionArray = ["30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px", "45px", "45px", "30px", "15px", "0", "0", "15px", "30px"];
-            var dayOrNight;
-            var positionString = "";
-            for (var i = 0; i < 4; i++) {
-                // if in day hours
-                if (Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) >= 8 && Number(hObj.hourly_forecast[(i * 3)].FCTTIME.hour) <= 19) {
-                    dayOrNight = "D";
-                } else {
-                    dayOrNight = "N";
-                }
-                positionString += dayOrNight;
-            }
-            var sun_moon = document.getElementById("sun_moon");
-            if (positionString.charAt(0) === "N") {
-                global_wrap.className = "global_wrap night_sky";
-                sun_moon.className = "moon";
-            }
-            var num = {
-                NNNN: 0,
-                NNND: 1,
-                NNDD: 2,
-                NDDD: 3,
-                DDDD: 4,
-                DDDN: 5,
-                DDNN: 6,
-                DNNN: 7
-            }[positionString];
-            if (window.matchMedia("(min-width: 1000px)").matches) {
-                for (var i = 0 + num; i < 9 + num; i++) {
-                    window["hourly_icon_" + (i - num)].style.top = positionArray[i];
-                }
-                console.log("horizontal version");
-            } else {
-                for (var i = 0 + num; i < 9 + num; i++) {
-                    window["hourly_icon_" + (i - num)].style.top = "0";
-                }
-                console.log("vertical version");
-            }
-        }
-        dayNightPosition();
-        imLoading("Y");
-*/
-
-/*
-Old clock function
-
-var pHours = document.getElementById("hours"),
-    pMinutes = document.getElementById("minutes"),
-    pSeconds = document.getElementById("seconds"),
-    pampm = document.getElementById("ampm"),
-    ampm;
-
-
-function setTime() {
-
-    var date = new Date();
-
-    updateSeconds(date.getSeconds());
-    updateMinute(date.getMinutes());
-    updateHour(date.getHours());
-
-    var update_date = function () {
-        date = new Date();
-        var seconds = date.getSeconds();
-        updateSeconds(seconds);
-
-        if (seconds === 0) {
-            var minutes = date.getMinutes();
-            updateMinute(minutes);
-        }
-        if (minutes === 0 && seconds === 0) {
-            var hours = date.getHours();
-            updateHour(hours)
-        }
-    }
-
-    function updateSeconds(seconds) {
-        if (seconds < 10) {
-            seconds = "0" + seconds;
-        }
-        pSeconds.textContent = seconds;
-    }
-
-    function updateMinute(minutes) {
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-        pMinutes.textContent = minutes;
-        console.log("minute change");
-    }
-
-    function updateHour(hours) {
-        console.log("hour/ampm change");
-        if (hours >= 12) {
-            hours -= 12;
-            ampm = "PM";
-        } else {
-            ampm = "AM";
-        }
-        if (hours === 0) {
-            hours = 12;
-        }
-        pampm.textContent = ampm;
-        pHours.textContent = hours;
-    }
-    update_date();
-    setInterval(update_date, 1000);
-}
-setTime();
-*/
+startPage.init("76148");
