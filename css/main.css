@@ -471,7 +471,7 @@ header h1 {
     height: 270px;
     width: 110%;
     left: -5%;
-    background-image: linear-gradient( rgba(0, 0, 0, 0) 50%, rgb(233, 195, 159) 95%);
+    background-image: linear-gradient( rgba(0, 0, 0, 0) 50%, rgb(233, 195, 159) 125%);
 }
 .bg_ground {
     position: absolute;
